@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:ui="http://java.sun.com/jsf/facelets"
+	xmlns:f="http://java.sun.com/jsf/core"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:p="http://primefaces.org/ui"
+	xmlns:pe="http://primefaces.org/ui/extensions">
+
+<h:head>
+	<title>Página inicial</title>
+	<h:outputStylesheet library="css" name="bootstrap.min.css" />
+	<h:outputStylesheet library="css" name="bootstrap-grid.css" />
+	<h:outputStylesheet library="css" name="font-awesome.css" />
+	<h:outputStylesheet library="css" name="bootstrap-utilities.min.css" />
+	<h:outputScript library="js" name="bootstrap.min.js" />
+</h:head>
+<h:body>
+	<div id="page">
+		<div id="cabecera">
+			<ui:insert name="header">
+				<ui:include src="/template/header.xhtml" />
+			</ui:insert>
+		</div>
+		<div id="menu">
+			<ui:insert name="menu">
+				<ui:include src="/template/menu.xhtml" />
+			</ui:insert>
+		</div>
+		<div id="contenido">
+			<ui:insert name="body">
+				<div class="modal fade" id="exampleModal" tabindex="-1"
+					aria-labelledby="exampleModalLabel" aria-hidden="true">
+					<div class="modal-dialog">
+						<div class="modal-content">
+							<div class="modal-header">
+								<h5 class="modal-title" id="exampleModalLabel">Registrar
+									producto</h5>
+								<button type="button" class="btn-close" data-bs-dismiss="modal"
+									aria-label="Close" />
+							</div>
+							<div class="modal-body">
+								<h:form id="modRegProd">
+									<p:growl life="5000" showDetail="true">
+										<p:autoUpdate />
+									</p:growl>
+									<div class="mb-3">
+										<p:inputText value="#{productoBean.modelo.nombre}"
+											styleClass="form-control form-control-sm"
+											placeholder="Producto">
+											<f:validator validatorId="validPROD"/>
+										</p:inputText>
+									</div>
+									<div class="mb-3">
+										<p:inputText value="#{productoBean.modelo.fecha}"
+											styleClass="form-control form-control-sm"
+											placeholder="Año de cosecha" />
+									</div>
+									<div class="input-group mb-3">
+										<span class="input-group-text">Precio S/.</span>
+										<p:inputText value="#{productoBean.modelo.precio}" styleClass="form-control form-control-sm" placeholder="Precio"/>
+									</div>
+									<div class="input-group mb-3">
+										<span class="input-group-text">Tipo</span>
+										<p:selectOneRadio value="#{productoBean.modelo.tipo}"
+															styleClass="form-control form-control-sm"
+															unselectable="true" required="true">
+											<f:selectItem itemLabel="Vino" itemValue="V"/>
+											<f:selectItem itemLabel="Pisco" itemValue="P"/>
+											<f:validateLength minimum="1"/>
+										</p:selectOneRadio>
+									</div>
+									<div class="input-group mb-3">
+										<span class="input-group-text">Tamaño</span>
+										<p:selectOneRadio value="#{productoBean.modelo.tam}"
+															styleClass="form-control form-control-sm"
+															unselectable="true" required="true">
+											<f:selectItem itemLabel="250 ML" itemValue="250 ML"/>
+											<f:selectItem itemLabel="500 ML" itemValue="500 ML"/>
+											<f:selectItem itemLabel="750 ML" itemValue="750 ML"/>
+										</p:selectOneRadio>
+									</div>
+									<div class="input-group mb-3">
+										<span class="input-group-text">Stock</span>
+										<p:inputText value="#{productoBean.modelo.stock}" styleClass="form-control form-control-sm" placeholder="Stock"/>
+									</div>
+									<div class="modal-footer">
+										<button type="button" class="btn btn-secondary"
+											data-bs-dismiss="modal">Cerrar</button>
+										<p:commandButton value="Guardar"
+											actionListener="#{productoBean.registrar()}" />
+									</div>
+								</h:form>
+							</div>
+						</div>
+					</div>
+				</div>
+				<h:form id="TablaProd">
+					<!-- Barra de herramientas -->
+					<p:toolbar>
+						<p:toolbarGroup>
+
+							<button type="button" class="btn" style="background-color: #2196f3; color: white;"
+								data-bs-toggle="modal" data-bs-target="#exampleModal">
+								+ Producto
+							</button>
+							<p:commandButton value="PDF"
+								style="margin-right: 0.5em; margin-left: 0.5em;">
+								<p:dataExporter type="pdf" target="tblProd" fileName="Productos" />
+							</p:commandButton>
+
+							<p:commandButton value="Excel">
+								<p:dataExporter type="xls" target="tblProd" fileName="Productos" />
+							</p:commandButton>
+							<p:commandButton value="Piscos"
+								actionListener="#{productoBean.verReportePiscoPDF()}"
+								onclick="this.form.target = '_blank'" ajax="false"
+								style="margin-right: 0.5em; margin-left: 0.5em;" />
+							<p:commandButton value="Vinos"
+								actionListener="#{productoBean.verReporteVinoPDF()}"
+								onclick="this.form.target = '_blank'" ajax="false" />
+						</p:toolbarGroup>
+						<p:toolbarGroup align="right">
+							<strong>Seleccionar por:</strong>
+							<p:selectOneMenu label="Mostrar" value="#{productoBean.opc}"
+								style="margin-right: 0.5em; margin-left: 0.5em;">
+								<f:selectItem noSelectionOption="true" itemLabel="Estado" />
+								<f:selectItem itemValue="1" itemLabel="Todos" />
+								<f:selectItem itemValue="2" itemLabel="Activos" />
+								<f:selectItem itemValue="3" itemLabel="Inactivos" />
+								<p:ajax event="change" listener="#{productoBean.opcListar()}"
+									update="tblProd" />
+							</p:selectOneMenu>
+						</p:toolbarGroup>
+					</p:toolbar>
+					<!-- Barra de herramientas -->
+					<!-- Tabla de datos de producto -->
+					<p:dataTable id="tblProd" var="dtProducto"
+						value="#{productoBean.listarProd}" rows="10" paginator="true"
+						paginatorPosition="bottom" stickyHeader="true"
+						selection="#{productoBean.selectedProduct}"
+						stickyTopAt=".layout-topbar" rowsPerPageTemplate="5, 10"
+						rowKey="#{dtProducto.codigo}" selectionMode="single">
+
+						<p:column headerText="Producto" filterBy="#{dtProducto.nombre}"
+							sortBy="#{dtProducto.nombre}">
+							<p:outputLabel value="#{dtProducto.nombre}" />
+						</p:column>
+
+						<p:column headerText="Clase" filterBy="#{dtProducto.tipo}"
+							sortBy="#{dtProducto.tipo}">
+							<p:outputLabel value="#{dtProducto.tipo}">
+								<f:converter converterId="tipoVal" />
+							</p:outputLabel>
+						</p:column>
+
+						<p:column headerText="Precio" filterBy="#{dtProducto.precio}"
+							sortBy="#{dtProducto.precio}">
+							<p:outputLabel value="#{dtProducto.precio}" />
+						</p:column>
+
+						<p:column headerText="Tamaño" filterBy="#{dtProducto.tam}"
+							sortBy="#{dtProducto.tam}">
+							<p:outputLabel value="#{dtProducto.tam}" />
+						</p:column>
+
+						<p:column headerText="Stock" filterBy="#{dtProducto.stock}"
+							sortBy="#{dtProducto.stock}">
+							<p:outputLabel value="#{dtProducto.stock}" />
+						</p:column>
+					</p:dataTable>
+					<!-- Tabla de datos de producto -->
+
+					<p:contextMenu for="tblProd">
+						<p:menuitem value="Modificar"
+							oncomplete="PF('dlgModificar').show();"
+							actionListener="#{productoBean.datos()}"
+							update="dlgModProd:pnlDataModProd" />
+
+						<p:menuitem value="Eliminar"
+							actionListener="#{productoBean.datos()}" update="pnlDelProd"
+							oncomplete="PF('dlgEliminar').show();" />
+					</p:contextMenu>
+
+					<p:dialog id="dlg1" header="Modificar producto"
+						widgetVar="dlgModificar" showEffect="fade" hideEffect="fade"
+						modal="true">
+						<h:form id="dlgModProd">
+							<h:panelGrid id="pnlDataModProd" columns="4" width="100%"
+								styleClass="customPanelGrid"
+								columnClasses="p-col-12 p-md-3 p-xl-2, p-col-12 p-md-9 p-xl-4, p-col-12 p-md-3 p-xl-2, p-col-12 p-md-9 p-xl-4">
+								<p:inputText value="#{productoBean.modelo.codigo}"
+									disabled="true" />
+								<p:outputLabel />
+
+								<p:outputLabel value="Producto" />
+								<p:inputText value="#{productoBean.modelo.nombre}" />
+
+								<p:outputLabel value="Cosecha" />
+								<p:inputText value="#{productoBean.modelo.fecha}" />
+
+								<p:outputLabel value="Precio" />
+								<p:inputText value="#{productoBean.modelo.precio}" />
+
+								<p:outputLabel value="Tipo" />
+								<p:inputText value="#{productoBean.modelo.tipo}" />
+
+								<p:outputLabel value="Tamaño" />
+								<p:inputText value="#{productoBean.modelo.tam}" />
+
+								<p:outputLabel value="Stock" />
+								<p:inputText value="#{productoBean.modelo.stock}" />
+							</h:panelGrid>
+						</h:form>
+						<f:facet name="footer">
+							<p:commandButton value="Guardar"
+								action="#{productoBean.modificar()}" />
+						</f:facet>
+					</p:dialog>
+
+					<p:dialog id="dlg2" header="Eliminar producto"
+						widgetVar="dlgEliminar" showEffect="fade" hideEffect="fade"
+						modal="true">
+						<p>
+							<strong>¿Desea eliminar este registro?</strong>
+						</p>
+						<h:form id="pnlDelProd">
+							<p:inputText value="#{productoBean.modelo.codigo}"
+								disabled="true" />
+						</h:form>
+						<f:facet name="footer">
+							<div style="margin-right: .5rem;">
+								<p:commandButton value="No" onclick="PF('dlgEliminar').hide();" />
+								<p:commandButton value="Si"
+									actionListener="#{productoBean.eliminar()}"
+									onclick="PF('dlgEliminar').hide();" update="tblProd" />
+							</div>
+						</f:facet>
+					</p:dialog>
+				</h:form>
+			</ui:insert>
+		</div>
+		<div id="pie">
+			<ui:insert name="footer">
+				<ui:include src="/template/footer.xhtml" />
+			</ui:insert>
+		</div>
+	</div>
+</h:body>
+</html>
